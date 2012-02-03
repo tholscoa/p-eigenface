@@ -17,7 +17,6 @@ public class PEigenface extends EigenFace {
 
 	public void initEigenfaces(PImage[] imageSet) {
 		this.imagesSet = imageSet;
-
 		double[][] dataSet = new double[imageSet.length][];
 		for (int i = 0; i < imageSet.length; i++) {
 			PImage img = imageSet[i];
@@ -26,8 +25,6 @@ public class PEigenface extends EigenFace {
 			dataSet[i] = getBrightnessArray(img);
 			imageSet[i] = img;
 		}
-		
-		
 		initEigenfaces(dataSet);
 		
 		// calculate Images
@@ -36,7 +33,6 @@ public class PEigenface extends EigenFace {
 			PImage eigen = getNormalizedImage(imageWidth, imageHeight, eigenFaces[i]);
 			imagesEigen[i] = eigen;
 		}
-		
 		reconstrucetedIamges=this.reconstructFaces(selectedNumOfEigenFaces);
 	}
 	
