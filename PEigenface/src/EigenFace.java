@@ -10,12 +10,10 @@ import cern.colt.matrix.impl.DenseDoubleMatrix2D;
 import cern.colt.matrix.linalg.EigenvalueDecomposition;
 
 
-
-
-
 public class EigenFace {
 	double[][] eigenFaces;
 	double[] dataAverage;
+	double[][] dataDifference;
 	int selectedNumOfEigenFaces = 25;
 	double[][] weights;
 
@@ -23,11 +21,11 @@ public class EigenFace {
 		// m.normalise();
 		// difference from average
 		dataAverage = MatrixMath.getAverage(dataSet);
-		dataSet = MatrixMath.subtractFromRows(dataSet, dataAverage);
+		dataDifference = MatrixMath.subtractFromRows(dataSet, dataAverage);
 		
 		// covarianzmatrix
-		double[][] mN = MatrixMath.multiply(dataSet,
-				MatrixMath.transpose(dataSet));
+		double[][] mN = MatrixMath.multiply(dataDifference,
+				MatrixMath.transpose(dataDifference));
 		
 		// eigenvaluedecomosition from cern
 		DenseDoubleMatrix2D d = new DenseDoubleMatrix2D(mN);
@@ -47,13 +45,13 @@ public class EigenFace {
 			eigenValues[i] = ep.eigenValue;
 			eigenVectors[i] = ep.eigenVector;
 		}
-		eigenFaces = MatrixMath.multiply(eigenVectors, dataSet);
+		eigenFaces = MatrixMath.multiply(eigenVectors, dataDifference);
 		eigenFaces = MatrixMath.normalizeRows(eigenFaces);
 		
 		// calculate Weights
 		double[][] eigenFacesPart = MatrixMath.getSubMatrix(eigenFaces, 0,
 				selectedNumOfEigenFaces);
-		weights = MatrixMath.multiply(dataSet,
+		weights = MatrixMath.multiply(dataDifference,
 				MatrixMath.transpose(eigenFacesPart));
 	}
 

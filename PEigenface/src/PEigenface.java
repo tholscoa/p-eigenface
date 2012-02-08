@@ -1,3 +1,4 @@
+
 import processing.core.PApplet;
 import processing.core.PImage;
 
@@ -10,6 +11,9 @@ public class PEigenface extends EigenFace {
 	PImage[] reconstrucetedIamges ;
 	PImage[] imagesEigen;
 	PImage[] imagesDistance;
+	final static int RGB=2;
+	final static int HSB=1;
+	final static int GRAY=0;
 	public PEigenface(PApplet parent) {
 		this.parent=parent;
 		// TODO Auto-generated constructor stub
@@ -30,7 +34,7 @@ public class PEigenface extends EigenFace {
 		// calculate Images
 		imagesEigen = new PImage[eigenFaces.length];
 		for (int i = 0; i < eigenFaces.length; i++) {
-			PImage eigen = getNormalizedImage(imageWidth, imageHeight, eigenFaces[i]);
+			PImage eigen = getNormalizedImage(imageWidth, imageHeight,0,255, eigenFaces[i]);
 			imagesEigen[i] = eigen;
 		}
 		reconstrucetedIamges=this.reconstructFaces(selectedNumOfEigenFaces);
@@ -49,7 +53,7 @@ public class PEigenface extends EigenFace {
 	public PImage[] reconstructFaces(int selectedeigenfaces) {			
 		PImage[] images=new PImage[imagesSet.length];
 		for (int i=0;i<imagesSet.length;i++){
-			images[i]=getImage(weights[i],selectedeigenfaces);
+			images[i]=getImageByWeights(weights[i],selectedeigenfaces);
 		}
 		return images;
 	}
@@ -63,20 +67,19 @@ public class PEigenface extends EigenFace {
 		return data;
 	}
 
-	public PImage getImage(double[] weights,int selectedeigenfaces) {
+	public PImage getImageByWeights(double[] weights,int selectedeigenfaces) {
 		double[][] egnfacesSubMatrix = MatrixMath.getSubMatrix(eigenFaces, 0,
 				selectedeigenfaces);
 		double[] imageData=MatrixMath.multiply(weights, egnfacesSubMatrix);
 		imageData = MatrixMath.add(imageData, dataAverage);
 		return getImage(imageWidth, imageHeight, imageData);
 	}
-	
-	public PImage getImage(int nX, int nY, double[] brightness) {
+	public PImage getImageBW(int nX, int nY,float limit, double[] brightness) {
 		PImage img = parent.createImage(nX, nY, PApplet.RGB);
 		for (int i = 0; i < brightness.length; i++) {
 			float b=Math.abs((int) brightness[i]);
 			//if (b<0)b=0;
-		if (b<200)b=0;
+		if (b<limit)b=0;
 			else{
 				b=255;
 			}
@@ -85,14 +88,24 @@ public class PEigenface extends EigenFace {
 		img.loadPixels();
 		return img;
 	}
+	public PImage getImage(int nX, int nY, double[] brightness) {
+		PImage img = parent.createImage(nX, nY, PApplet.RGB);
+		for (int i = 0; i < brightness.length; i++) {
+			float b=Math.abs((int) brightness[i]);
+			if (b<0)b=0;
+			img.pixels[i] = parent.color(b);
+		}
+		img.loadPixels();
+		return img;
+	}
 
-	public PImage getNormalizedImage(int nX, int nY, double[] brightness) {
+	public PImage getNormalizedImage(int nX, int nY,float goalMin,float goalMax, double[] brightness) {
 		PImage img = parent.createImage(nX, nY, PApplet.RGB);
 		double min = MatrixMath.min(brightness);
 		double max = MatrixMath.max(brightness);
 		for (int i = 0; i < brightness.length; i++) {
 			float cB = PApplet.map((float) brightness[i], (float) min,
-					(float) max, 0, 255);
+					(float) max, goalMin, goalMax);
 			img.pixels[i] = parent.color(cB);
 		}
 		img.loadPixels();
